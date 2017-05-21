@@ -1,8 +1,14 @@
 import React from 'react';
+import propTypes from 'prop-types';
 import {fabric} from 'fabric';
 import FabricObjects from '../../lib/fabric-objects';
 
 export default class Board extends React.Component {
+  static propTypes = {
+    isDrawingAllowed: propTypes.bool.isRequired,
+    brushWidth: propTypes.number.isRequired,
+  }
+
   drawnObjects = new Map();
 
   componentDidMount = () => {
@@ -33,6 +39,7 @@ export default class Board extends React.Component {
 
   componentWillReceiveProps = newProps => {
     this.canvas.isDrawingMode = newProps.isDrawingAllowed;
+    this.canvas.freeDrawingBrush.width = newProps.brushWidth;
   }
 
   render = () => {

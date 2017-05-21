@@ -5,6 +5,7 @@ import Options from './Options';
 export default class App extends React.Component {
   state = {
     isDrawingAllowed: true,
+    brushWidth: 1,
   }
 
   toggleAllowDrawing = () => {
@@ -13,15 +14,24 @@ export default class App extends React.Component {
     }));
   }
 
+  setBrushWidth = ({target: {value}}) => {
+    this.setState(state => ({
+      brushWidth: Number(value),
+    }));
+  }
+
   render = () => (
     <div>
       <h1>Hello world</h1>
 
       <Board
-        isDrawingAllowed={this.state.isDrawingAllowed} />
+        isDrawingAllowed={this.state.isDrawingAllowed}
+        brushWidth={this.state.brushWidth} />
       <Options
         isDrawingAllowed={this.state.isDrawingAllowed}
-        toggleAllowDrawing={this.toggleAllowDrawing} />
+        toggleAllowDrawing={this.toggleAllowDrawing}
+        brushWidth={this.state.brushWidth}
+        setBrushWidth={this.setBrushWidth} />
     </div>
   )
 }
