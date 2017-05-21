@@ -5,6 +5,7 @@ import FabricObjects from '../../lib/fabric-objects';
 import {Mongo} from 'meteor/mongo';
 import {
   deepCompare,
+  deepMerge,
   filterMap,
 } from '../../lib/utils';
 
@@ -95,7 +96,7 @@ export default class Board extends React.Component {
             return;
           }
 
-          Object.assign(existingObject, fabricObject);
+          deepMerge(existingObject, fabricObject);
 
           this.canvas.renderAll();
         });

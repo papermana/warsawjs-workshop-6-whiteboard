@@ -17,3 +17,17 @@ export const deepCompare = (obj1, obj2) => {
 
   return JSON.stringify(obj1) === JSON.stringify(obj2);
 };
+
+export const deepMerge = (obj, objToMerge) => {
+  for (let prop in objToMerge) {
+    if (objToMerge.hasOwnProperty(prop)) {
+      if (typeof prop === 'object') {
+        obj[prop] = deepMerge(prop, objToMerge[prop]);
+      } else {
+        obj[prop] = objToMerge[prop];
+      }
+    }
+  }
+
+  return obj;
+}
