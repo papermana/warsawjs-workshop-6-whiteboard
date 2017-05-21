@@ -2,6 +2,13 @@ import React from 'react';
 import propTypes from 'prop-types';
 import {fabric} from 'fabric';
 import FabricObjects from '../../lib/fabric-objects';
+import {Mongo} from 'meteor/mongo';
+import {
+  deepCompare,
+  filterMap,
+} from '../../lib/utils';
+
+Meteor.subscribe('fabricObjects');
 
 export default class Board extends React.Component {
   static propTypes = {
@@ -18,9 +25,17 @@ export default class Board extends React.Component {
 
     this.canvas.on('object:added', async ({target}) => {
       try {
-        const id = await FabricObjects.genInsert(target.toObject());
+        if (this.drawnObjects.has(target)) {
+          return;
+        }
+
+        const id = new Mongo.ObjectID()._str;
 
         this.drawnObjects.set(target, id);
+        FabricObjects.genInsert({
+          _id: id,
+          data: target.toObject(),
+        });
       } catch (e) {
         console.error(
           'Something went wrong when inserting a canvas object in DB: ',
@@ -33,7 +48,10 @@ export default class Board extends React.Component {
       try {
         const id = this.drawnObjects.get(target);
 
-        FabricObjects.genUpdate({_id: id}, target.toObject());
+        FabricObjects.genUpdate({_id: id}, {
+          _id: id,
+          data: target.toObject()
+        });
       } catch (e) {
         console.error(
           'Something went wrong when updating a canvas object in DB: ',
@@ -55,6 +73,33 @@ export default class Board extends React.Component {
       }
     });
 
+    FabricObjects.find().observeChanges({
+      added: (id, {data}) => {
+        if ([...this.drawnObjects.values()].find(x => x === id)) {
+          return;
+        }
+
+        fabric.util.enlivenObjects([data], ([fabricObject]) => {
+          this.drawnObjects.set(fabricObject, id);
+          this.canvas.add(fabricObject);
+        });
+      },
+      changed: (id, {data}) => {
+        fabric.util.enlivenObjects([data], ([fabricObject]) => {
+          const existingObject = filterMap(
+            this.drawnObjects,
+            objId => objId === id,
+          );
+
+          if (deepCompare(existingObject, fabricObject)) {
+            return;
+          }
+
+          Object.assign(existingObject, fabricObject);
+
+          this.canvas.renderAll();
+        });
+      },
     });
   }
 

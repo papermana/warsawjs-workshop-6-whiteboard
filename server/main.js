@@ -1,2 +1,8 @@
 import { Meteor } from 'meteor/meteor';
-import '../imports/lib/fabric-objects';
+import FabricObjects from '../imports/lib/fabric-objects';
+
+Meteor.publish({
+  fabricObjects() {
+    return FabricObjects.find();
+  }
+});
